@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ilon O'yini</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #000000;
+}
+
+
+.game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+canvas {
+    border: 3px solid #ff0000;
+}
+
+
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1600" height="1000"></canvas>
+    </div>
+
+
+    <script src="script.js"></script>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+
+// Ilon parametrlari
+const snakeSize = 20;
+let snake = [{ x: 100, y: 100 }];
+let direction = 'RIGHT';
+let apple = spawnApple();
+
+
+// O'yin parametrlarining boshida
+let score = 0;
+let gameOver = false;
+
+
+document.addEventListener('keydown', changeDirection);
+
+
+// O'yinni boshqarish
+function gameLoop() {
+    if (gameOver) return displayGameOver();
+
+
+    moveSnake();
+    checkCollisions();
+    drawGame();
+    setTimeout(gameLoop, 100);  // O'yin tezligini sozlash
+}
+
+
+// O'yinning boshqaruvi
+function changeDirection(event) {
+    if (event.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
+    if (event.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
+    if (event.key === 'ArrowLeft' && direction !== 'RIGHT') direction = 'LEFT';
+    if (event.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
+}
+
+
+// Ilonni harakatlantirish
+function moveSnake() {
+    const head = { ...snake[0] };
+
+
+    if (direction === 'UP') head.y -= snakeSize;
+    if (direction === 'DOWN') head.y += snakeSize;
+    if (direction === 'LEFT') head.x -= snakeSize;
+    if (direction === 'RIGHT') head.x += snakeSize;
+
+
+    snake.unshift(head);
+
+
+    // Ilon olmani yedi
+    if (head.x === apple.x && head.y === apple.y) {
+        score += 100;
+        apple = spawnApple();
+    } else {
+        snake.pop();
+    }
+}
+
+
+// Olma yangi joyda paydo bo'lishi
+function spawnApple() {
+    const x = Math.floor(Math.random() * (canvas.width / snakeSize)) * snakeSize;
+    const y = Math.floor(Math.random() * (canvas.height / snakeSize)) * snakeSize;
+    return { x, y };
+}
+
+
+// O'yinning tugashi
+function checkCollisions() {
+    const head = snake[0];
+
+
+    // Ekran chegarasini urish
+    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+        gameOver = true;
+    }
+
+
+    // O'zini urish
+    for (let i = 1; i < snake.length; i++) {
+        if (head.x === snake[i].x && head.y === snake[i].y) {
+            gameOver = true;
+        }
+    }
+}
+
+
+// Ekranda o'yinni chizish
+function drawGame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+    // Ilonni chizish
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i === 0 ? 'green' : 'lime';  // Ilon boshini yashil, tanasini yashil rangda
+        ctx.fillRect(snake[i].x, snake[i].y, snakeSize, snakeSize);
+    }
+
+
+    // Olmani chizish
+    ctx.fillStyle = 'red';
+    ctx.fillRect(apple.x, apple.y, snakeSize, snakeSize);
+
+
+    // Skorni ko'rsatish
+    ctx.fillStyle = 'white';
+    ctx.font = '20px Arial';
+    ctx.fillText('ball: ' + score, 10, 30);
+}
+
+
+// O'yin tugagandan so'ng ko'rsatish
+function displayGameOver() {
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Arial';
+    ctx.fillText('O\'YIN TUGADI!', canvas.width / 3, canvas.height / 2);
+    ctx.fillText('ball: ' + score, canvas.width / 3, canvas.height / 2 + 40);
+}
+
+
+gameLoop();
+
+
+    </script>
+</body>
+</html>
+
+
+
